@@ -1,4 +1,6 @@
 import subprocess
+from eliminarUsuario import eliminarSitioWeb, eliminarHost
+
 
 def agregarURL(sitioWeb):
 
@@ -17,6 +19,7 @@ def agregarURL(sitioWeb):
                         shell=True, check=True)
     except subprocess.CalledProcessError as e:
         print(f"error al crear URL")
+        raise e
 
 def crearDirectorio(sitioWeb):
     subvolume=f'btrfs subvolume create /srv/www/{sitioWeb}'
@@ -28,6 +31,7 @@ def crearDirectorio(sitioWeb):
         print(f"Creado directorio y subvolume")
     except subprocess.CalledProcessError as e:
         print(f"error Directorio subvolume")
+        raise e
 
 def crearVirtualHost(sitioWeb):
     archivo= f'/etc/apache2/vhosts.d/{sitioWeb}.conf'
@@ -54,7 +58,8 @@ def crearVirtualHost(sitioWeb):
             archivo_abierto.write(configuracion)
         print(f"archivo creado y escrito")
     except Exception as e:
-            print(f"error")
+            print(f"error al crear virtual host")
+            raise e
 
 def crearIndex(sitioWeb):
     comando =f'echo "<h1>Bienvenido a {sitioWeb}</h1>" | tee /srv/www/{sitioWeb}/public_html/index.php'
@@ -63,6 +68,7 @@ def crearIndex(sitioWeb):
         subprocess.run(comando, shell=True, check=True)
     except subprocess.CalledProcessError as e:
         print(f"error index.php")
+        raise e
 
 def crearUsuario(sitioWeb, nombreUser, contra):
     usuario=f'useradd -d /srv/www/{sitioWeb}/public_html -m {nombreUser}'
@@ -80,6 +86,7 @@ def crearUsuario(sitioWeb, nombreUser, contra):
             print(f"contraseña asignada")
         except subprocess.CalledProcessError as e:
             print(f"error al asignar contraseña")
+            raise e
 
 def asignarPermisos(nombreUser, sitioWeb):
     permiso=f'chmod 755 /srv/www/{sitioWeb}/public_html '
@@ -90,6 +97,7 @@ def asignarPermisos(nombreUser, sitioWeb):
         print(f"permiso 755")
     except subprocess.CalledProcessError as e:
         print(f"error al asignar permiso")
+        raise e
 
 def idSubvolume(sitioWeb):
     comando=f'btrfs subvolume list /srv/www | grep "/{sitioWeb}"'
@@ -113,6 +121,7 @@ def asignarQuota(quota, sitioWeb):
         print(f"Quota asignada")
     except subprocess.CalledProcessError as e:
         print(f"error al asignar quota")
+        raise e
 
 def reiniciarApacheFTP():
     apache=f'service apache2 restart'
@@ -125,15 +134,22 @@ def reiniciarApacheFTP():
         print(f"Vsftpd reinicio")
     except subprocess.CalledProcessError as e:
         print(f"error al reiniciar")
+        raise e
 
 
 def crearSitioWeb(sitioWeb, nombreUser, contra, quota):
-    agregarURL(sitioWeb)
-    crearDirectorio(sitioWeb)
-    asignarQuota(quota, sitioWeb)
-    crearVirtualHost(sitioWeb)
-    crearIndex(sitioWeb)
-    crearUsuario(sitioWeb, nombreUser, contra)
-    asignarPermisos(nombreUser, sitioWeb)
-    reiniciarApacheFTP()
+    
+    try:
+        agregarURL(sitioWeb)
+        crearDirectorio(sitioWeb)
+        asignarQuota(quota, sitioWeb)
+        crearVirtualHost(sitioWeb)
+        crearIndex(sitioWeb)
+        crearUsuario(sitioWeb, nombreUser, contra)
+        asignarPermisos(nombreUser, sitioWeb)
+        reiniciarApacheFTP()
+    except Exception as e:
+        eliminarSitioWeb(sitioWeb)
+        eliminarHost(sitioWeb)
+        raise Exception("Error al crear usuario") from e
 
