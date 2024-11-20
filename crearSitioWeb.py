@@ -203,6 +203,10 @@ def crearSitioWeb(sitioWeb, nombreUser, contra, quota, gestorBD, nombreBD):
         crearIndex(nombreUser, sitioWeb)
         create_user(nombreUser, contra, gestorBD, nombreBD)
         authApache(nombreUser, contra, sitioWeb)
+        
+        if gestorBD == "MySQL":
+            configurar_phpmyadmin(sitioWeb, nombreBD)
+        
         reiniciarApacheFTP()
     except Exception as e:
         eliminarSitioWeb(sitioWeb)
@@ -242,6 +246,33 @@ def editarSitioWeb(antSitio, nuevoSitio, nombreUser):
         reiniciarApacheFTP()
     except Exception as e:
         raise Exception("Error al editar nombre de Sitio") from e
+
+def configurar_phpmyadmin(sitioWeb, nombreBD):
+    config_file = '/etc/phpMyAdmin/config.inc.php'
+    config_line = f"$cfg['PmaAbsoluteUri'] = 'http://www.{sitioWeb}/{nombreBD}/';\n"
+    
+    try:
+        # Leer el contenido actual del archivo
+        with open(config_file, 'r') as file:
+            content = file.readlines()
+        
+        # Buscar si ya existe una línea con PmaAbsoluteUri
+        for i, line in enumerate(content):
+            if "$cfg['PmaAbsoluteUri']" in line:
+                content[i] = config_line
+                break
+        else:
+            # Si no se encuentra, añadir al final del archivo
+            content.append(config_line)
+        
+        # Escribir el contenido actualizado
+        with open(config_file, 'w') as file:
+            file.writelines(content)
+        
+        print(f"Configuración de phpMyAdmin actualizada para {sitioWeb}")
+    except Exception as e:
+        print(f"Error al configurar phpMyAdmin: {str(e)}")
+        raise
 
 
 
