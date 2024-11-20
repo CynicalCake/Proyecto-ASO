@@ -105,10 +105,6 @@ Para phpMyAdmin, puede ser necesario añadir la siguiente línea en el archivo d
 $cfg['PmaAbsoluteUri'] = 'http://www.ejemplo.com/basededatos/';
 ```
 
-## Contribuciones
-
-Las contribuciones son bienvenidas. Por favor, abra un issue o realice un pull request con sus sugerencias.
-
 ## Licencia
 
 Universidad Mayor de San Simón, Facultad de Ciencias y Tecnología, Carrera de Licenciatura en Ingeniería de Sistemas
