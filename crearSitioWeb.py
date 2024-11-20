@@ -192,8 +192,7 @@ def authApache(user, contra, sitioWeb):
         raise e
 
 
-def crearSitioWeb(sitioWeb, nombreUser, contra, quota, gestorBD, nombreBD, userBD, contraBD):
-    
+def crearSitioWeb(sitioWeb, nombreUser, contra, quota, gestorBD, nombreBD):
     try:
         agregarURL(sitioWeb)
         crearDirectorio(sitioWeb)
@@ -202,13 +201,13 @@ def crearSitioWeb(sitioWeb, nombreUser, contra, quota, gestorBD, nombreBD, userB
         crearUsuario(sitioWeb, nombreUser, contra)
         asignarPermisos(nombreUser, sitioWeb)
         crearIndex(nombreUser, sitioWeb)
-        create_user(userBD, contraBD, gestorBD, nombreBD)
+        create_user(nombreUser, contra, gestorBD, nombreBD)
         authApache(nombreUser, contra, sitioWeb)
         reiniciarApacheFTP()
     except Exception as e:
         eliminarSitioWeb(sitioWeb)
         eliminarHost(sitioWeb)
-        raise Exception("Error al crear usuario") from e
+        raise Exception(f"Error al crear usuario: {str(e)}") from e
 
 def renombrarDir(antSitio, nuevoSitio):
     renombrar=f'btrfs subvolume snapshot /srv/www/{antSitio} /srv/www/{nuevoSitio}'
