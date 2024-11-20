@@ -44,11 +44,11 @@ def obtenerInfoBD(usuario):
 
     # Intenta obtener información de MySQL
     try:
-        cmd = f"mysql -N -e \"SHOW DATABASES LIKE '{usuario}_%'\""
+        cmd = f"mysql -N -e \"SELECT Db FROM mysql.db WHERE User = '{usuario}' LIMIT 1\""
         result = subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if result.stdout:
             return "MySQL", result.stdout.decode().strip()
     except subprocess.CalledProcessError:
         pass
 
-    return "N/a", "N/a"
+    return "Error", "Error"
